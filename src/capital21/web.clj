@@ -49,7 +49,22 @@
   "Input form handler.
 
    Outputs an HTML form that allows user to select country code to display GNI per capita"
-  (response "foo"))
+  (response (str "<!DOCTYPE html>" 
+                 (h/html [:html 
+                          [:head 
+                           [:title "GNI Per Capita chart"]
+                           ]
+                          [:body
+                           (f/form-to {:id "selection" :class "form-inline"} 
+                                      [:get "/plot"]
+                                      [:select {:name "country"} 
+                                       [:option { :value  "FRA"} "FRA"]
+                                       [:option { :value  "USA"} "USA"]
+                                       [:option { :value  "ZWE"} "ZWE"]
+                                       ]
+                                      [:input#submit {:type "submit" :name "plot-country" :value "Plot"}]
+                                      )
+                           ]]))))
 
 (defn route
   "Route request according to input URI"
