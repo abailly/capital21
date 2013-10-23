@@ -10,12 +10,8 @@
    * [clj-time Library](https://github.com/seancorfield/clj-time)"
   (:use     ring.util.response)
   (:use     ring.middleware.params)
-  (:use     ring.middleware.resource)
   (:use     ring.middleware.reload)
-  (:use     ring.middleware.file)
   (:use     com.duelinmarkers.ring-request-logging)
-  (:use     ring.middleware.file-info)
-  (:use     ring.middleware.stacktrace)
   (:use incanter.core)
   (:import [java.io ByteArrayOutputStream ByteArrayInputStream])
   (:require [clojure.data.json :as json :refer [ read-str write-str]]
@@ -48,14 +44,15 @@
   [request]
   "Input form handler.
 
-   Outputs an HTML form that allows user to select country code to display GNI per capita"
+   Outputs an HTML form that allows user to select country code to display GNI per capita. 
+   Demonstrates the use [hiccup](https://github.com/weavejester/hiccup) for composing s-expressions representing HTML fragments."
   (response (str "<!DOCTYPE html>" 
                  (h/html [:html 
                           [:head 
                            [:title "GNI Per Capita chart"]
                            ]
                           [:body
-                           (f/form-to {:id "selection" :class "form-inline"} 
+                           (f/form-to {:id "selection" :class "form-inline" :target "_blank"} 
                                       [:get "/plot"]
                                       [:select {:name "country"} 
                                        [:option { :value  "FRA"} "FRA"]
@@ -67,11 +64,13 @@
                            ]]))))
 
 (defn route
-  "Route request according to input URI"
+  "Route request according to input URI.
+
+   [Compojure](https://github.com/weavejester/compojure) provides cleaner and more 
+   concise handling of those routes"
   [request]
   (cond (= "/" (:uri request))     (input-form request)
         (= "/plot" (:uri request)) (plot request)))
-
 
 (def app
   (->  #'route

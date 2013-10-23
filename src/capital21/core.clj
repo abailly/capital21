@@ -14,7 +14,7 @@
   (:require [ clojure.data.xml :as xml1])
   (:require [ clojure.zip :as zip])
   (:require [ clojure.data.zip.xml :as zx])
-  (:import [java.io FileInputStream]
+  (:import [java.io FileInputStream FileOutputStream]
            [java.util.zip ZipFile]))
 
 ;; # Scraping the World Bank Database
@@ -37,13 +37,37 @@
                       (io/file filename))))
 
 ;; then we extract the interesting data from the zip file, using standard java API.
+;; 
+;; We need to take special care for the extracted XML file because it appears to contain a BOM marker 
+;; at start which makes XML parser choke. Using BOM should be avoided but it is common practice in Microsoft
+;; world to include it when encoding data in UTF-8
+
+(defn copy-without-BOM
+  "A version of copy that skips the first 3 bytes of the input stream, assuming they are a BOM character.
+
+   This is a bit gross and brutal as we do not check these 3 skipped bytes are actually the U+FEFF character 
+   encoded in UTF-8, and this is a lot of code just to filter copy. A more interesting version would be to
+   override the definition of copy for a `FilteredOutputStream`."
+  [input output]
+  (let [buffer (make-array Byte/TYPE 1024)]
+    (loop [offset 0]
+      (let [size (.read input buffer)]
+        (when (pos? size)
+          (do (if (= 0 offset)
+                (.write output buffer 3 (- size 3))
+                (.write output buffer 0 size))
+              (recur (+ offset size))))))
+    ))
+
 (defn extract-xml-data-file
-  [series filename]
-  (with-open 
-      [zip (ZipFile. filename)]
-    (let [output-name (str series "_Indicator_en_xml_v2.xml")]
-      (io/copy (.getInputStream zip (.getEntry zip output-name))(io/file output-name))
-      )))
+  "Extracts XML series file from zipped data."
+  [series zip-filename]
+  (let [output-name (str series "_Indicator_en_xml_v2.xml")]
+    (with-open [zip (ZipFile. zip-filename)
+                input (.getInputStream zip (.getEntry zip output-name))
+                output (FileOutputStream. output-name)]
+      (copy-without-BOM input output))
+    output-name))
 
 ;; ## Format Data
 
