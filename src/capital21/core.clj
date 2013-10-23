@@ -61,20 +61,28 @@
   ;; 
   ;; Outputs a vector of vectors, one for each year/value couple for given key and given country code.
   [xml-file country-key]
-  (let [elem (zip/xml-zip (xml1/parse xml-file))]
+  (let [elem (zip/xml-zip (xml1/parse xml-file))
+        atoi (fn [s] (if (= "" s) 0 (Integer. s)))]
     (dataset  ["year" "value"]
-     (map #(first 
-            (for [r  (zx/xml-> (zip/xml-zip %))]
-              [(get-data r "Year")
-               (get-data r "Value")]))
-          (zx/xml-> 
-           elem
-           :data
-           :record
-           :field
-           (zx/attr= :key country-key)
-           zip/up
-           first)))))
+              (map #(first 
+                     (for [r  (zx/xml-> (zip/xml-zip %))]
+                       [(atoi (get-data r "Year"))
+                        (atoi (get-data r "Value"))]))
+                   (zx/xml-> 
+                    elem
+                    :data
+                    :record
+                    :field
+                    (zx/attr= :key country-key)
+                    zip/up
+                    first)))))
+
+(defn plot-data-set
+  [dataset]
+  (with-data dataset
+    (view (xy-plot ($ :year) ($ :value)
+                   :x-label "Year"
+                   :y-label "GDP Per capita"))))
 
 (defn -main
   "I don't do a whole lot ... yet."
