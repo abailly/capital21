@@ -40,8 +40,12 @@
 
 ;; ## Format Data
 
+(defmacro get-data
+  [x name]
+  `(zx/xml1-> ~x :field (zx/attr= :name ~name) zx/text))
+
 (defn make-data-set
-  ;; build a data set from given xml data file using given country code and key
+  ;; build a data set from given xml data file using given country code
   ;; xml file is expected to comply with the following format:
   ;;
   ;;        <?xml version="1.0" encoding="utf-8"?>
@@ -55,19 +59,22 @@
   ;;             </record>
   ;;             <record>
   ;; 
-  ;; output data set contains two columns, one for year and one for value
-  [xml-file country-key item-key]
+  ;; Outputs a vector of vectors, one for each year/value couple for given key and given country code.
+  [xml-file country-key]
   (let [elem (zip/xml-zip (xml1/parse xml-file))]
-    (map #'xml1/emit-str
-         (zx/xml-> 
-          elem
-          :data
-          :record
-          :field
-          (zx/attr= :key "FRA")
-          zip/up
-          first))
-))
+    (vec
+     (map #(first 
+            (for [r  (zx/xml-> (zip/xml-zip %))]
+              [(get-data r "Year")
+               (get-data r "Value")]))
+          (zx/xml-> 
+           elem
+           :data
+           :record
+           :field
+           (zx/attr= :key country-key)
+           zip/up
+           first)))))
 
 (defn -main
   "I don't do a whole lot ... yet."
