@@ -62,7 +62,7 @@
   ;; Outputs a vector of vectors, one for each year/value couple for given key and given country code.
   [xml-file country-key]
   (let [elem (zip/xml-zip (xml1/parse xml-file))]
-    (vec
+    (dataset  ["year" "value"]
      (map #(first 
             (for [r  (zx/xml-> (zip/xml-zip %))]
               [(get-data r "Year")
