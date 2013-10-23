@@ -45,21 +45,21 @@
   `(zx/xml1-> ~x :field (zx/attr= :name ~name) zx/text))
 
 (defn make-data-set
-  ;; build a data set from given xml data file using given country code
-  ;; xml file is expected to comply with the following format:
-  ;;
-  ;;        <?xml version="1.0" encoding="utf-8"?>
-  ;;          <Root xmlns:wb="http://www.worldbank.org">
-  ;;           <data>
-  ;;             <record>
-  ;;               <field name="Country or Area" key="ABW">Aruba</field>
-  ;;               <field name="Item" key="NY.GNP.PCAP.CD">GNI per capita, Atlas method (current US$)</field>
-  ;;               <field name="Year">1960</field>
-  ;;               <field name="Value" />
-  ;;             </record>
-  ;;             <record>
-  ;; 
-  ;; Outputs a vector of vectors, one for each year/value couple for given key and given country code.
+  "Build a data set from given xml data file using given country code
+  xml file is expected to comply with the following format:
+  
+         <?xml version=\"1.0\" encoding=\"utf-8\"?>
+           <Root xmlns:wb=\"http://www.worldbank.org\">
+            <data>
+              <record>
+                <field name=\"Country or Area\" key=\"ABW\">Aruba</field>
+                <field name=\"Item\" key=\"NY.GNP.PCAP.CD\">GNI per capita, Atlas method (current US$)</field>
+                <field name=\"Year\">1960</field>
+                <field name=\"Value\" />
+              </record>
+              <record>
+  
+  Outputs an incanter dataset built from a each year/value couple found in the XML stream."
   [xml-file country-key]
   (let [elem (zip/xml-zip (xml1/parse xml-file))
         atoi (fn [s] (if (= "" s) 0 (Integer. s)))]
@@ -78,11 +78,15 @@
                     first)))))
 
 (defn plot-data-set
+  "Plot the given dataset, as produced by make-data-set.
+
+   This uses the `view` function from incanter to plot a graph displayed in a swing window."
   [dataset]
   (with-data dataset
-    (view (xy-plot ($ :year) ($ :value)
-                   :x-label "Year"
-                   :y-label "GDP Per capita"))))
+    (xy-plot ($ :year) ($ :value)
+             :x-label "Year"
+             :y-label "GDP Per capita"
+             :title "Evolution of GDP per capita ")))
 
 (defn -main
   "I don't do a whole lot ... yet."
