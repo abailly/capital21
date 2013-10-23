@@ -28,16 +28,35 @@
   (:use capital21.core)
   )
 
-(defn route [request]
-  "Routing handler. Delegates to concrete functions according to properties of the request."
+(defn stream-plot
+  "Generate chart for a given country code as an `InputStream`"
+  [country]
+  (let [chart (plot-data-set (make-data-set (io/reader "NY.GNP.PCAP.CD_Indicator_en_xml_v2.xml") country))
+                     out-stream (ByteArrayOutputStream.)]
+                 (save chart out-stream)
+                 (ByteArrayInputStream.
+                  (.toByteArray out-stream))))
+
+(defn plot [request]
+  "Plot handler.
+
+   Respond a PNG image stream for given country"
   (let [{:strs [country]} (:params request)] 
-    (response  (let [chart (plot-data-set (make-data-set (io/reader "NY.GNP.PCAP.CD_Indicator_en_xml_v2.xml") country))
-                     out-stream (ByteArrayOutputStream.)
-                     in-stream (do
-                                 (save chart out-stream)
-                                 (ByteArrayInputStream.
-                                  (.toByteArray out-stream)))]
-                     in-stream))))
+    (response  ( stream-plot country))))
+
+(defn input-form
+  [request]
+  "Input form handler.
+
+   Outputs an HTML form that allows user to select country code to display GNI per capita"
+  (response "foo"))
+
+(defn route
+  "Route request according to input URI"
+  [request]
+  (cond (= "/" (:uri request))     (input-form request)
+        (= "/plot" (:uri request)) (plot request)))
+
 
 (def app
   (->  #'route

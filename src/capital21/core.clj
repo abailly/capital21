@@ -1,4 +1,11 @@
 (ns capital21.core
+  "Analyze an input file to extract data.
+
+   Some references used:
+   
+   * [Tutorial on zippers](http://clojure-doc.org/articles/tutorials/parsing_xml_with_zippers.html)
+   * [data.zip API](http://clojure.github.io/data.zip/)
+   * [Incanter Core API](http://liebke.github.io/incanter/)"
   (:gen-class)
   (:use ( incanter core stats charts excel))
   (:require [clojure.java.io :as io])
@@ -76,6 +83,8 @@
                     (zx/attr= :key country-key)
                     zip/up
                     first)))))
+
+;; ## Plot Data
 
 (defn plot-data-set
   "Plot the given dataset, as produced by make-data-set.
