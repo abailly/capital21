@@ -4,6 +4,9 @@
   (:require [clojure.java.io :as io])
   (:require [pl.danieljanus.tagsoup :as tagsoup])
   (:require [clj-http.client :as client])
+  (:require [ clojure.data.xml :as xml1])
+  (:require [ clojure.zip :as zip])
+  (:require [ clojure.data.zip.xml :as zx])
   (:import [java.io FileInputStream]
            [java.util.zip ZipFile]))
 
@@ -20,7 +23,7 @@
 
 (defn download-xml-in-zip
   "Download given series and put it in a file."
-  ([series]          (get-xml-data series "out.zip"))
+  ([series]          (download-xml-in-zip series "out.zip"))
   ([series filename] (io/copy  
                       (:body 
                        (client/get (str "http://api.worldbank.org/v2/en/indicator/" series "?downloadformat=xml") {:as :byte-array})) 
@@ -28,15 +31,43 @@
 
 ;; then we extract the interesting data from the zip file, using standard java API.
 (defn extract-xml-data-file
-  "extract XML data for given series from given filename"
   [series filename]
   (with-open 
       [zip (ZipFile. filename)]
     (let [output-name (str series "_Indicator_en_xml_v2.xml")]
       (io/copy (.getInputStream zip (.getEntry zip output-name))(io/file output-name))
-      )
-    ))
+      )))
 
+;; ## Format Data
+
+(defn make-data-set
+  ;; build a data set from given xml data file using given country code and key
+  ;; xml file is expected to comply with the following format:
+  ;;
+  ;;        <?xml version="1.0" encoding="utf-8"?>
+  ;;          <Root xmlns:wb="http://www.worldbank.org">
+  ;;           <data>
+  ;;             <record>
+  ;;               <field name="Country or Area" key="ABW">Aruba</field>
+  ;;               <field name="Item" key="NY.GNP.PCAP.CD">GNI per capita, Atlas method (current US$)</field>
+  ;;               <field name="Year">1960</field>
+  ;;               <field name="Value" />
+  ;;             </record>
+  ;;             <record>
+  ;; 
+  ;; output data set contains two columns, one for year and one for value
+  [xml-file country-key item-key]
+  (let [elem (zip/xml-zip (xml1/parse xml-file))]
+    (map #'xml1/emit-str
+         (zx/xml-> 
+          elem
+          :data
+          :record
+          :field
+          (zx/attr= :key "FRA")
+          zip/up
+          first))
+))
 
 (defn -main
   "I don't do a whole lot ... yet."
