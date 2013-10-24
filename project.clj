@@ -28,4 +28,5 @@ References used:
                  [com.duelinmarkers/ring-request-logging "0.2.0"]]
   :plugins [[lein-marginalia "0.7.1"]
             [lein-ring "0.8.6"]]
-  :ring {:handler capital21.web/app})
+  :ring {:handler capital21.web/app}
+  :main capital21.main)
