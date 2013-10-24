@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+
+    <title>Scraping the Web with Clojure</title>
+
+    <meta name="author" content="Arnaud Bailly">
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/beige-code.css" id="theme">
+
+    <!-- For syntax highlighting -->
+    <link rel="stylesheet" href="lib/css/tomorrow-night-eighties.css">
+
+    <!-- If the query includes 'print-pdf', use the PDF print sheet -->
+    <script>
+      document.write( '<link rel="stylesheet" href="css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
+    </script>
+
+    <!--[if lt IE 9]>
+        <script src="lib/js/html5shiv.js"></script>
+        <![endif]-->
+  </head>
+
+  <body>
+
+    <div class="reveal">
+
+      <!-- Any section element inside of this container is displayed as a slide -->
+      <div class="slides">
+
+        <section class="photo cover">
+          <div style="padding-bottom: 2em; padding-top: 2em; background-color: #fff; opacity: .7">
+            <h2 style="margin-top: 1.2em; margin-bottom: 0.6em">Scraping the Web <br/>with Clojure</h2>
+            <h3 style="margin-bottom: 0.5em">Getting started having fun with functional programming...</h3>
+            <p class="me"><a href="mailto:arnaud@foldlabs.com">Arnaud Bailly</a></p>
+          </div>
+        </section>
+
+        <section data-background="m/background.png">
+          <h3>Who am I?</h3>
+          <table style="margin-right:auto; margin-left:35%">
+            <tr class="fragment"><td>1982</td><td> → </td><td>Basic (ZX80)</td></tr>
+            <tr class="fragment"><td>1995</td><td> → </td><td>Visual Basic (Access 95)</td></tr>
+            <tr class="fragment"><td>1998</td><td> → </td><td>Java</td></tr>
+            <tr class="fragment"><td>2001</td><td> → </td><td>Haskell</td></tr>
+            <tr class="fragment"><td>2006</td><td> → </td><td>Scala</td></tr>
+            <tr class="fragment"><td>2012</td><td> → </td><td>Clojure</td></tr>
+          </table>
+          <p class="fragment">Work at Murex (2<sup>nd</sup> largest French publisher, global leader in capital market)</p>
+          <p class="fragment"><b style="color: red">We are hiring...</b></p>
+        </section>
+
+        <section data-background="m/background.png">
+          <h3>Goal &amp; Agenda</h3>
+          <p class="fragment">Giving the desire to try and experiment with Clojure</p>
+          <p class="fragment">Main components to write (simple) web applications</p>
+          <p class="fragment">Overview of tools on how to write clojure applications</p>
+          <p class="fragment">Mostly code...</p>
+        </section>
+
+        <section data-background="m/background.png">
+          <h3>Leiningen 2</h3>
+          <img src="m/leiningen.jpg"/>
+          <p>Standard build (and much more) tool for Clojure <em>à la</em> sbt</p>
+          <aside class="notes">
+            <ul>
+              <li>self-installation from root script (windows/unix), bootstrap projects</li>
+              <li>wraps/leverages maven repositories</li>
+              <li>simple project descriptor as clojure form</li>
+              <li>extensible w/ plugins</li>
+              <li>lein deps -> lein compile -> lein test -> lein run</li>
+              <li>lein uberjar for easy packaging of webapp</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section data-background="m/background.png">
+          <h3>Emacs</h3>
+          <img src="m/emacs-logo.svg" />
+          <p>Best text editor ever (sorry Vim) and state-of-the-art development environment for Clojure</p>
+          <aside class="notes">
+            <ul>
+              <li>provide specific modes for clojure: clojure-mode, midje-mode, nrepl-mode</li>
+<li>paredit toolkit for working with parens, quotes, braces...</li>
+<li>interact with repl: load file, define namespace (C-c M-n), evaluate expressions (C-c C-e)</li>
+<li>C-M-f, C-M-b moves fwd/bwd in expressions, M-s splice expression, M-S split, C/M-right/left expands/shrinkg current expression</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section data-background="m/background.png">
+          <h3>clj-http</h3>
+          <img src="m/fishnet.jpg"/>
+          <p>Wraps Apache Http Components in an easy to use and configurable clojure interface. Works with SSL, cookies, forms,...</p>
+          <aside class="notes">
+            <ul>
+              <li>show simple use in capital21.core. Some clojure features: namespaces, multiple bodies w/ different args in defn, use of maps, prefix namespace, string documentation</li>
+              <li>load file then evaluate (download-xml-in-zip "NY.GNP.PCAP.CD")</li>
+              <li>show advanced uses in train.scrap</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section data-background="m/background.png">
+          <h3>clojure.data.json</h3>
+          <img src="m/json.gif"/>
+          <p>Transform JSON to/from clojure maps and vectors</p>
+          <aside class="notes">
+            <ul>
+              <li>from train.scrap: (clojure.data.json/read-str "{\"foo\": 12, \"bar\": false}" :key-fn keyword)</li>
+              <li>clojure keywords</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section data-background="m/background.png">
+          <h3>Zippers</h3>
+          <img src="m/zipper.jpg" width="400px" />
+          <p>Pure functional tree navigation and mutation for eg. XML data</p>
+          <aside class="notes">
+            <ul>
+              <li>retrieve XML file from WB data: (extract-xml-data-file "NY.GNP.PCAP.CD" "out.zip")</li>
+              <li>lazy XML parser, works for large to very large XML files</li>
+              <li>navigate/select XML data using zippers: immutable and persistent structures, build elements lazily while traversing data</li>
+              <li>(make-data-set (io/reader "NY.GNP.PCAP.CD_Indicator_en_xml_v2.xml") "FRA") → outputs dataset extracted from XML file</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section data-background="m/background.png">
+          <h3>Java Interoperability</h3>
+          <img src="m/babel.jpg"  width="500px"/>
+          <p>Seamlessly use Java classes, objects and methods in clojure code</p>
+          <aside class="notes">
+            <ul>
+              <li>see copy-without-BOM function: use of java streams, byte arrays</li>
+              <li>typical (loop ... recur) special form, provides tail recursivity</li>
+              <li>in stream-transducer/xducer/http_support → use of (doto obj ...) special form for sequencing methods invocation</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section data-background="m/background.png">
+          <h3>Midje</h3>
+          <img src="m/tdd.png" />
+          <p>General purpose test framework, BDD-style, with mocks, continuous testing, emacs mode...</p>
+          <aside class="notes">
+            <ul>
+              <li>see semiring_test</li>
+              <li>show evaluation within emacs? → need different repl, lein deps on xducer</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section data-background="m/background.png">
+          <h3>Ring</h3>
+          <img src="m/one-ring.jpg" />
+          <p>Dead simple web applications library inspired by Rack, Sinatra, WSGI...</p>
+          <aside class="notes">
+            <ul>
+              <li>(app) form in capital21.web: shows (-> ..) form for chaining calls, use of middlewares to transform requests/responses</li>
+              <li>request is simply a map, a clojure structure one can navigate: eg (:uri request) → the URI of the request</li>
+              <li>params extraction done through middleware, (response) encapsulates effective output of response</li>
+              <li>lein ring server → starts server from lein, provides autoreload capabilities</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section data-background="m/background.png">
+          <h3>Hiccup</h3>
+          <img src="m/hiccup.jpg" />
+          <p>HTML as clojure maps and vectors structures</p>
+          <aside class="notes">
+            <ul>
+              <li>s-exp representing HTML tree: tag and attributes as keywords, vector for children</li>
+              <li>specific support for forms</li>
+              <li>classes and ids in tag names <tt>:table#tickets.table-striped.table.table-condensed</tt> </li>
+            </ul>
+          </aside>
+        </section>
+
+        <section data-background="m/background.png">
+          <h3>Incanter</h3>
+          <img src="m/incanter-ds-banner.png"/>
+          <p>Statistics, time series, plotting and charting in Clojure</p>
+          <aside class="notes">
+            <ul>
+              <li>demo with capital21 web app</li>
+              <li>uses jfreechart and colt, inspired by R</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section data-background="m/background.png">
+          <h3>Marginalia</h3>
+          <img src="m/kells.jpg" height="500px" />
+          <p>Literate-programming style document generator</p>
+          <aside class="notes">
+            <ul>
+              <li>lein marg → start docs/uberdoc.html</li>
+            </ul>
+          </aside>
+        </section>
+
+        <section data-background="m/background.png">
+          <h3>Run in the Cloud</h3>
+          <img src="m/clouds.jpg"/>
+          <p>Deploy to any Java-enabled hosting platform, eg. <a href="http://clever-cloud.com">Clever Cloud</a></p>
+        </section>
+
+        <section data-background="m/background.png">
+          <h3>And Much, Much more...</h3>
+          <img src="m/smaug.jpg"/>
+          <p>software transactional memory, agents, asynchronous dispatching, javascript compiler, macros, persistent data, DAtomic functional database, even <em>static typing</em>!</p>
+        </section>
+
+        <section data-background="m/background.png">
+          <h1>Thank you!</h1>
+          <p><a href="https://twitter.com/abailly">@abailly</a></p>
+          <p><a href="https://github.com/abailly/capital21">Capital21</a>: Visualizing wealth</p>
+          <p><a href="https://github.com/abailly/lein-maven-plugin">lein-maven-plugin</a>: Wrap lein in maven!</p>
+        </section>
+
+<!--
+ - emacs: http://commons.wikimedia.org/wiki/File:Emacs-logo.svg
+ - lein: http://leiningen.org/img/leiningen.jpg
+ - zipper: http://content.answcdn.com/main/content/img/shutterstock/6/6/66069736.jpg
+ - filet: http://www.hellopro.fr/images/produit-2/3/0/5/filets-de-peche-sennes-tournantes-et-coulissantes-213503.jpg
+ - babel: http://upload.wikimedia.org/wikipedia/commons/d/d6/Marten_van_Valckenborch_Tower_of_babel-large.jpg
+ - ring: http://www.film.com/wp-content/uploads/2011/06/One-Ring-to-Rule-Them-All1.jpg
+ - tdd: http://wrozka.github.io/ppppp-pair-programming/img/red-green-refactor.png
+ - hiccup: http://static.ddmcdn.com/gif/hiccup-250x150.jpg
+ - clouds: http://thebowditchgroup.com/wp-content/uploads/2010/12/clouds.jpg
+ - kells: http://1.bp.blogspot.com/-6bzMrL2GIjI/UZPL6WB6hAI/AAAAAAAAAEw/wcy2fAlN17Y/s1600/images+Kells+3.jpg
+ - smaug: http://cryston.blog.com/files/2011/08/Film_Rumor_46919_smaug_the_dragon_from_the_hobbit_550x263.jpg
+-->
+      </div>
+
+    </div>
+
+    <script src="lib/js/head.min.js"></script>
+    <script src="js/reveal.min.js"></script>
+
+    <script>
+  // Full list of configuration options available here:
+  // https://github.com/hakimel/reveal.js#configuration
+  Reveal.initialize({
+    controls: false,
+    progress: false,
+    history: true,
+    center: true,
+    mouseWheel: true,
+    rollingLinks: false,
+    transition: 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+    // Optional libraries used to extend on reveal.js
+    dependencies: [
+      { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+      { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+      { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+      { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+      { src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+      { src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } },
+      { src: '/socket.io/socket.io.js', async: true, callback: function() { window.socket = io.connect("http://localhost"); } },
+      { src: 'plugin/notes-server/client.js', async: true },
+      { src: 'plugin/math/math.js', async: true },
+    ]
+  });
+    </script>
+  </body>
+</html>
